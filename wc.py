@@ -4,6 +4,7 @@
 # add context around spelling areas
 # file with words to add to dictionary
 # better output formatting
+# how to handle hyphenated words
 # "testing"
 #
 
@@ -28,11 +29,14 @@ with open(fn) as f:
             continue
         if not front_matter:
             wc = wc + len(line.split())
-            misspelled = spell.unknown([w for w in 
-                                        [''.join(filter(lambda c: c.isalpha() or c == "'", w)) 
-                                         for w in line.split()]
-                                         if len(w) > 0])
+            words = [w for w in 
+                        [''.join(filter(lambda c: c.isalpha() or c == "'" or c == "-", w)) 
+                        for w in line.split()]
+                            if len(w) > 0]
+            misspelled = spell.unknown(words)
             if len(misspelled) > 0:
+                print('\n\nFound mispelling:')
+                print(words)
                 for word in misspelled:
                     print(f'{word} misspelled on {idx}, candidates are {spell.candidates(word)}')
 
