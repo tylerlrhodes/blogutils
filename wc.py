@@ -22,7 +22,7 @@ else:
     add_words = False
 
 file_name = sys.argv[1]
-wc = 0
+word_count = 0
 custom_words = set()
 
 try:
@@ -43,7 +43,7 @@ with open(file_name) as f:
             continue
         if not front_matter:
             line_words = line.split()
-            wc = wc + len(line_words)
+            word_count = word_count + len(line_words)
             words = [w for w in 
                         [''.join(filter(lambda c: c.isalpha() or c == "'" or c == "-", w)) 
                         for w in line_words]
