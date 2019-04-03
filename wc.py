@@ -56,7 +56,7 @@ with open(file_name) as f:
                     custom_words.add(word)
                     print(f'{word} misspelled on {idx}, candidates are {spell.candidates(word)}')
 
-print(f'{wc} words are in the file, not including front matter')
+print(f'{word_count} words are in the file, not including front matter')
 
 if add_words:
     print(f'Adding words: {custom_words}')
