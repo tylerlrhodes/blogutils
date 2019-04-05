@@ -6,7 +6,9 @@
 # better output formatting
 # how to handle hyphenated words
 # "testing"
-#
+# ignore code blocks in markdown - between '''
+# ignore markdown links
+# 
 
 import sys
 import pickle
