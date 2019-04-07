@@ -8,6 +8,9 @@
 # "testing"
 # ignore code blocks in markdown - between '''
 # ignore markdown links
+# it would be nice to add words to the custom dictionary on a word by word basis
+# it would be nice to be able to ignore words without adding them to the dictionary per document
+# a mode to go from one misspelled word to the next
 # 
 
 import sys
@@ -33,6 +36,28 @@ try:
 except Exception as e:
     print(f'Error loading custom dictionary words! {e}')
 
+# cases to deal with:
+# - hyphenated words
+# - characters that words can have within them
+# - markdown links need to be ignored
+# - words with numbers in them should be ignored
+# - dealing with when i write something like word1/word2/word3 and use the slash to seperate them
+# - strip leading and trailing quotations from words
+# 
+
+def remove_links(line):
+    # do nothing for now
+    return line
+
+def get_line_words(line):
+    line = remove_links(line)
+    line_words = [w for w in line.split() if not any(c.isdigit() for c in w)]
+    words = [w for w in 
+                [''.join(filter(lambda c: c.isalpha() or c in "'-", w)) 
+                for w in line_words]
+                    if len(w) > 0]
+    return words
+    
 with open(file_name) as f:
     front_matter = True
     marker_count = 0
@@ -44,12 +69,8 @@ with open(file_name) as f:
             front_matter = False if marker_count == 2 else True
             continue
         if not front_matter:
-            line_words = line.split()
-            word_count = word_count + len(line_words)
-            words = [w for w in 
-                        [''.join(filter(lambda c: c.isalpha() or c == "'" or c == "-", w)) 
-                        for w in line_words]
-                            if len(w) > 0]
+            words = get_line_words(line)
+            word_count = word_count + len(words)
             misspelled = spell.unknown(words)
             if len(misspelled) > 0:
                 print('\n\nFound mispelling:')
