@@ -17,14 +17,23 @@ import sys
 import pickle
 from spellchecker import SpellChecker
 
+# Filename to check
 if len(sys.argv) < 2:
     print('Please provide a file name!')
     exit(1)
 
+# Add words at end of run to custom words?
 if len(sys.argv) == 3:
     add_words = bool(sys.argv[2])
 else:
     add_words = False
+
+# Single step mode
+if len(sys.argv) == 4:
+    single_step_mode = bool(sys.argv[3])
+else:
+    single_step_mode = False
+
 
 file_name = sys.argv[1]
 word_count = 0
@@ -52,6 +61,12 @@ def remove_links(line):
 def get_line_words(line):
     line = remove_links(line)
     line_words = [w for w in line.split() if not any(c.isdigit() for c in w)]
+    for idx, w in enumerate(line_words):
+        if len(w) > 1 and not w[0].isalpha():
+            w = w[1:]
+        if len(w) > 1 and not w[-1].isalpha():
+            w = w[0:-1]
+        line_words[idx] = w
     words = [w for w in 
                 [''.join(filter(lambda c: c.isalpha() or c in "'-", w)) 
                 for w in line_words]
@@ -76,8 +91,14 @@ with open(file_name) as f:
                 print('\n\nFound mispelling:')
                 print(f'Context: {words}')
                 for word in misspelled:
-                    custom_words.add(word)
                     print(f'{word} misspelled on {idx}, candidates are {spell.candidates(word)}')
+                    if single_step_mode:
+                        c = input("To continue enter 'c', enter 'a' to add word:")
+                        if c == 'a':
+                            custom_words.add(word)
+                            spell.word_frequency.load_words(custom_words)
+                    else:
+                        custom_words.add(word)
 
 print(f'{word_count} words are in the file, not including front matter')
 
