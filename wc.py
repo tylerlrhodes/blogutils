@@ -11,7 +11,7 @@
 # it would be nice to add words to the custom dictionary on a word by word basis
 # it would be nice to be able to ignore words without adding them to the dictionary per document
 # a mode to go from one misspelled word to the next
-# 
+# only print added words from current session, not all historical custom words
 
 import sys
 import pickle
@@ -23,13 +23,13 @@ if len(sys.argv) < 2:
     exit(1)
 
 # Add words at end of run to custom words?
-if len(sys.argv) == 3:
+if len(sys.argv) > 2:
     add_words = bool(sys.argv[2])
 else:
     add_words = False
 
 # Single step mode
-if len(sys.argv) == 4:
+if len(sys.argv) > 3:
     single_step_mode = bool(sys.argv[3])
 else:
     single_step_mode = False
@@ -56,6 +56,7 @@ except Exception as e:
 
 def remove_links(line):
     # do nothing for now
+    
     return line
 
 def get_line_words(line):
