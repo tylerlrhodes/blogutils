@@ -75,14 +75,55 @@
     (catch Exception e
       println e)))
 
+(defn print-entry
+  [entry]
+  (clojure.pprint/pprint entry))
+
+(defn get-new-meta
+  [entry]
+  (let [yaml (:yaml entry)]
+    (let [yaml (assoc yaml
+                      :description
+                      (do
+                        (println "Enter Description: ")
+                        (read-line)))]
+      (let [yaml (assoc yaml
+                        :keywords
+                        (do
+                          (println "Enter Keywords: ")
+                          (apply list (string/split (read-line) #" "))))]
+        (let [yaml (assoc yaml
+                          :tags
+                          (do
+                            (println "Enter Tags: ")
+                            (apply list (string/split (read-line) #" "))))]
+          (assoc entry
+                 :yaml
+                 yaml))))))
 
 (defn program
   []
   (let [entries
-        (filter #(:needs-fix %1)
-                (map
-                 (comp needs-meta-fix? get-yaml get-front-matter)
-                 (get-files "C:\\temp\\blog2\\content\\posts\\")))]
-    (doseq [e entries]
-      (clojure.pprint/pprint e))))
+        (filter
+         #(:needs-fix %1)
+         (map
+          (comp needs-meta-fix? get-yaml get-front-matter)
+          (get-files "C:\\temp\\blog2\\content\\posts\\")))]
+    (loop [entries entries
+           term ""]
+      (if (or
+           (nil? entries)
+           (= term "q"))
+        true
+        (do
+          (println "Existing entry: \n")
+          (print-entry (first entries))
+          (let [updated-entry (get-new-meta (first entries))]
+            (println "\n\nUpdated Entry:")
+            (print-entry updated-entry)
+            (println "\nr to redo, n to continue, q to quit:")
+            (recur (rest entries) (str (read)))))))))
+
+
+        
 
