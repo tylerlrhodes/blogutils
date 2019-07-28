@@ -11,12 +11,12 @@
 ;; meta tags
 
 (defn get-front-matter
-  [fn]
+  [file-name]
   (try
-    {:fn fn
+    {:file-name file-name
      :front-matter
      (let [result
-           (with-open [rdr (reader fn)]
+           (with-open [rdr (reader file-name)]
              (reduce
               #(if (and
                     (not (nil? %2))
@@ -36,15 +36,53 @@
     (catch Exception e
       println e)))
 
+(defn get-yaml
+  [entry]
+  (if-let [front-matter (:front-matter entry)]
+    (assoc entry
+           :yaml
+           (yaml/parse-string front-matter))
+    (assoc entry
+           :yaml nil)))
+
 (defn needs-meta-fix?
-  [front-matter]
-  true)
+  [entry]
+  (assoc entry
+         :needs-fix
+         (if-let [yaml (:yaml entry)]
+           (not
+            (and
+             (:description yaml)
+             (:keywords yaml)
+             (:tags yaml)))    
+           false)))
 
-(defn do-stuff
-  [dir]
-  (let [to-update (remove nil? (map (comp needs-meta-fix? get-front-matter (fn [f] (.getPath f))) (file-seq (file dir))))]
-    to-update))
+(defn get-files
+  [directory]
+  (try
+    (remove
+     (fn
+       [path]
+       (if (string/ends-with? (string/lower-case path)
+                              ".md")
+         false
+         true))
+     (map
+      (fn
+        [file]
+        (.getPath file))
+      (file-seq (file directory))))
+    (catch Exception e
+      println e)))
 
 
-
+(defn program
+  []
+  (let [entries
+        (filter #(:needs-fix %1)
+                (map
+                 (comp needs-meta-fix? get-yaml get-front-matter)
+                 (get-files "C:\\temp\\blog2\\content\\posts\\")))]
+    (doseq [e entries]
+      (clojure.pprint/pprint e))))
 
