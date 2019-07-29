@@ -112,7 +112,7 @@
     (loop [entries entries
            term ""]
       (if (or
-           (nil? entries)
+           (empty? entries)
            (= term "q"))
         true
         (do
