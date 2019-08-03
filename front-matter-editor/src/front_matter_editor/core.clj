@@ -23,11 +23,11 @@
                     (= %2 "---"))
                  (if (= 1 (:marker %1))
                    (reduced
-                    (string/join "\n" (reverse (:lines %1))))
+                    (string/join "\n" (:lines %1)))
                    {:marker (inc (:marker %1))
                     :lines  (:lines %1)})
                  {:marker (:marker %1)
-                  :lines  (conj (:lines %1) %2)})
+                  :lines  (conj (apply vector (:lines %1)) %2)})
               {:marker 0 :lines nil}
               (line-seq rdr)))]
        (if (map? result)
