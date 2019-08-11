@@ -119,7 +119,7 @@
     (if-let [new-text
              (string/replace
               (string/replace text #"\r\n" "\n")
-              #"(?<=---\n)([\w\s:\"\-\[\]\,]*)(?=---)"
+              #"(?<=---\n)([\w\s:\"\-\[\]\,\(\)]*)(?=---)"
               (yaml/generate-string (:yaml entry)))]
       (spit (:file-name entry) new-text)
       (println "Error updating: " (:file-name entry)))
@@ -152,7 +152,15 @@
                 (= input "n") (do (write-updated-entry updated-entry) (recur (rest entries) false))
                 (= input "q") (recur nil true)))))))))
 
-(update-entries "C:\\temp\\blog2\\content\\posts\\")
+;;(update-entries "C:\\temp\\blog2\\content\\posts\\")
+
+(defn -main
+  [& args]
+  (if (seq args)
+    (update-entries (first args))
+    (println "Must pass a directory as an argument!")))
+
+
 
 
 
