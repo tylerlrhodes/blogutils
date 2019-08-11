@@ -145,11 +145,12 @@
           (let [updated-entry (get-new-meta (first entries))]
             (println "\n\nUpdated Entry:")
             (print-entry updated-entry)
-            (println "\nr to redo, n to continue, q to quit:")
+            (println "\nr to redo, n to continue, q to quit, wq to write and quit:")
             (let [input (str (read-line))]
               (cond
                 (= input "r") (recur entries false)
                 (= input "n") (do (write-updated-entry updated-entry) (recur (rest entries) false))
+                (= input "wq") (do (write-updated-entry updated-entry) (recur nil true))
                 (= input "q") (recur nil true)))))))))
 
 ;;(update-entries "C:\\temp\\blog2\\content\\posts\\")
