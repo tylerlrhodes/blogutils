@@ -10,6 +10,11 @@
 ;; for each entry that needs updating, prompt the user for the missing
 ;; meta tags
 
+
+;; theres a bug in this, it will include lines before the first "---"
+;; in the lines which would be parsed later in the pipeline
+;; not going to fix it
+;; this probably should have just been a regex operation
 (defn get-front-matter
   [file-name]
   (try
@@ -101,19 +106,38 @@
                  :yaml
                  yaml))))))
 
-(defn program
-  []
+;; read the file and get string
+
+;; replace the front-matter
+
+;; write the file out to disk
+;; (string/replace (string/replace text #"\r\n" "\n") #"(?<=---\n)([\w\s:\"\-\[\]\,]*)(?=---)" (yaml/generate-string (:yaml (get-new-meta (get-yaml (get-front-matter "c:\\temp\\blog2\\content\\posts\\back-to-sicp.md"))))))
+
+(defn write-updated-entry
+  [entry]
+  (if-let [text (slurp (:file-name entry))]
+    (if-let [new-text
+             (string/replace
+              (string/replace text #"\r\n" "\n")
+              #"(?<=---\n)([\w\s:\"\-\[\]\,]*)(?=---)"
+              (yaml/generate-string (:yaml entry)))]
+      (spit (:file-name entry) new-text)
+      (println "Error updating: " (:file-name entry)))
+    (println "Error reading files: " (:file-name entry))))
+                            
+(defn update-entries
+  [directory]
   (let [entries
         (filter
          #(:needs-fix %1)
          (map
           (comp needs-meta-fix? get-yaml get-front-matter)
-          (get-files "C:\\temp\\blog2\\content\\posts\\")))]
+          (get-files directory)))]
     (loop [entries entries
-           term ""]
+           term false]
       (if (or
            (empty? entries)
-           (= term "q"))
+           (= term true))
         true
         (do
           (println "Existing entry: \n")
@@ -122,7 +146,18 @@
             (println "\n\nUpdated Entry:")
             (print-entry updated-entry)
             (println "\nr to redo, n to continue, q to quit:")
-            (recur (rest entries) (str (read)))))))))
+            (let [input (str (read-line))]
+              (cond
+                (= input "r") (recur entries false)
+                (= input "n") (do (write-updated-entry updated-entry) (recur (rest entries) false))
+                (= input "q") (recur nil true)))))))))
+
+(update-entries "C:\\temp\\blog2\\content\\posts\\")
+
+
+
+
+
 
 
         
